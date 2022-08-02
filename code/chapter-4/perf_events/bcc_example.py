@@ -33,4 +33,4 @@ while True:
       break
 
 for (comm, times) in aggregates.most_common(): 
-  print("Program {} executed {} times".format(comm, times))
+  print(f"Program {comm} executed {times} times")

@@ -9,7 +9,8 @@ def signal_ignore(signal, frame):
     print()
 
 
-bpf_source = """
+bpf_source = (
+    """
 #include <uapi/linux/ptrace.h>
 
 BPF_HASH(cache, u64, u64);
@@ -22,8 +23,7 @@ int trace_bpf_prog_load_start(void *ctx) {
   return 0;
 }
 """
-
-bpf_source += """
+    + """
 int trace_bpf_prog_load_return(void *ctx) {
   u64 *start_time_ns, delta;
   u64 pid = bpf_get_current_pid_tgid();
@@ -36,6 +36,7 @@ int trace_bpf_prog_load_return(void *ctx) {
   return 0;
 }
 """
+)
 
 bpf = BPF(text=bpf_source)
 bpf.attach_kprobe(event="bpf_prog_load", fn_name="trace_bpf_prog_load_start")

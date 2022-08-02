@@ -11,7 +11,8 @@ def signal_ignore(signal, frame):
     print()
 
 
-bpf_source = """
+bpf_source = (
+    """
 #include <uapi/linux/ptrace.h>
 #include <uapi/linux/bpf_perf_event.h>
 #include <linux/sched.h>
@@ -23,8 +24,7 @@ struct trace_t {
 BPF_HASH(cache, struct trace_t);
 BPF_STACK_TRACE(traces, 10000);
 """
-
-bpf_source += """
+    + """
 int collect_stack_traces(struct bpf_perf_event_data *ctx) {
   u32 pid = bpf_get_current_pid_tgid() >> 32;
   if (pid != PROGRAM_PID)
@@ -38,6 +38,7 @@ int collect_stack_traces(struct bpf_perf_event_data *ctx) {
   return 0;
 }
 """
+)
 
 program_pid = int(sys.argv[1])
 bpf_source = bpf_source.replace('PROGRAM_PID', str(program_pid))
@@ -68,7 +69,7 @@ for trace, acc in sorted(bpf['cache'].items(), key=lambda cache: cache[1].value)
                 continue
             line.extend([function_name])
 
-    if len(line) < 1:
+    if not line:
         continue
     frame = ";".join(line)
     sys.stdout.write("%s %d\n" % (frame, acc.value))

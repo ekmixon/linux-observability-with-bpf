@@ -1,6 +1,7 @@
 from bcc import BPF
 
-bpf_source = """
+bpf_source = (
+    """
 BPF_HASH(cache, u64, u64);
 
 int trace_start_time(struct pt_regs *ctx) {
@@ -10,8 +11,7 @@ int trace_start_time(struct pt_regs *ctx) {
   return 0;
 }
 """
-
-bpf_source += """
+    + """
 int print_duration(struct pt_regs *ctx) {
   u64 pid = bpf_get_current_pid_tgid();
   u64 *start_time_ns = cache.lookup(&pid);
@@ -23,6 +23,7 @@ int print_duration(struct pt_regs *ctx) {
   return 0;
 }
 """
+)
 
 bpf = BPF(text = bpf_source)
 bpf.attach_uprobe(name = "./hello-bpf", sym = "main.main", fn_name = "trace_start_time")
